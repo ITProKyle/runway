@@ -37,9 +37,9 @@ class ConfigNotFound(RunwayError):
 
     looking_for: list[str]
     message: str
-    path: Path
+    path: Path | None
 
-    def __init__(self, *, looking_for: list[str] | None = None, path: Path) -> None:
+    def __init__(self, looking_for: list[str] | None = None, path: Path | None = None) -> None:
         """Instantiate class.
 
         Args:
@@ -55,6 +55,10 @@ class ConfigNotFound(RunwayError):
         else:
             self.message = f"config file not found at path {path}"
         super().__init__(self.path, self.looking_for)
+
+    def __reduce__(self) -> tuple[type[Exception], tuple[Any, ...]]:
+        """Support for pickling."""
+        return self.__class__, (self.looking_for, self.path)
 
 
 class DockerConnectionRefusedError(RunwayError):
