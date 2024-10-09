@@ -45,7 +45,6 @@ gitpython = "*"
 igittigitt = ">=2.0.5"
 jinja2 = ">=2.7"  # used in runway.cfngin.blueprints.raw
 packaging = "*"  # component of setuptools needed for version compare
-pipenv = "2022.1.8"
 pyOpenSSL = "*"  # For embedded hook & associated script usage
 pydantic = "^2.8.0"
 pyhcl = "^0.4"  # does not support HCL2, possibly move to extras_require in the future
@@ -58,11 +57,11 @@ typing_extensions = "*"  # only really needed for < 3.8 but can still be used in
 yamllint = "*"
 
 [tool.poetry.group.dev.dependencies]
-pre-commit = "^3.8.0"
+pre-commit = "^4.0.1"
 
 [tool.poetry.group.docs.dependencies]
 autodoc-pydantic = "^2.2.0"
-doc8 = "^1.1.1"
+doc8 = "^1.1.2"
 furo = "^2024.8.6"
 jsx-lexer = "^2.0.1"
 sphinx = "^7.4.7"
@@ -76,25 +75,25 @@ sphinxcontrib-jquery = "^4.1"
 sphinxcontrib-programoutput = "^0.17"
 
 [tool.poetry.group.lint.dependencies]
-black = "^24.8.0"
-ruff = "^0.5.7"
+black = "^24.10.0"
+ruff = "^0.6.9"
 
 [tool.poetry.group.test.dependencies]
-coverage = {extras = ["toml"], version = "^7.6.1"}
-moto = {extras = ["ec2", "ecs", "iam", "s3", "ssm"], version = "^5.0.12"}
-pipenv = "^2022.1.8"  # only used in tests
-pytest = "^8.3.2"
+coverage = {extras = ["toml"], version = "^7.6.2"}
+moto = {extras = ["ec2", "ecs", "iam", "s3", "ssm"], version = "^5.0.16"}
+pipenv = "^2024.1.0"  # only used in tests
+pytest = "^8.3.3"
 pytest-cov = "^5.0.0"
 pytest-mock = "^3.14.0"
-pytest-order = "^1.2.1"
+pytest-order = "^1.3.0"
 pytest-subprocess = "^1.5.2"
 pytest-sugar = "^1.0.0"
 pytest-xdist = {extras = ["psutil"], version = "^3.6.1"}
-testfixtures = "^7.0.3"  # TODO (kyle) remove use of this dependency - was inherited
-tomli-w = "^1.0.0"
+testfixtures = "^8.3.0"  # TODO (kyle) remove use of this dependency - was inherited
+tomli-w = "^1.1.0"
 
 [tool.poetry.group.types.dependencies]
-mypy-boto3 = "^1.34.158"  # importable boto3 type annotations
+mypy-boto3 = "^1.35.36"  # importable boto3 type annotations
 
 [tool.poetry.group.types.dependencies.boto3-stubs]
 extras = [
@@ -115,7 +114,7 @@ extras = [
   "ssm",
   "sts",
 ]
-version = "^1.34.158"
+version = "^1.35.36"
 
 [tool.poetry.scripts]
 runway = "runway._cli.main:cli"
