@@ -57,7 +57,7 @@ typing_extensions = "*"  # only really needed for < 3.8 but can still be used in
 yamllint = "*"
 
 [tool.poetry.group.dev.dependencies]
-pre-commit = "^4.0.1"
+pre-commit = "^4.1.0"
 
 [tool.poetry.group.docs.dependencies]
 autodoc-pydantic = "^2.2.0"
@@ -68,20 +68,19 @@ sphinx = "^7.4.7"
 sphinx-copybutton = "^0.5.2"
 sphinx-design = "^0.6.1"
 sphinx-github-changelog = "^1.4.0"
-sphinx-notfound-page = "^1.0.4"
+sphinx-notfound-page = "^1.1.0"
 sphinxcontrib-apidoc = "^0.5.0"
 sphinxcontrib-external-links = "^0.1.1"
 sphinxcontrib-jquery = "^4.1"
 sphinxcontrib-programoutput = "^0.17"
 
 [tool.poetry.group.lint.dependencies]
-black = "^24.10.0"
-ruff = "^0.9.2"
+ruff = "^0.9.4"
 
 [tool.poetry.group.test.dependencies]
 coverage = {extras = ["toml"], version = "^7.6.10"}
-moto = {extras = ["ec2", "ecs", "iam", "s3", "ssm"], version = "^5.0.26"}
-pipenv = "^2024.4.0"  # only used in tests
+moto = {extras = ["ec2", "ecs", "iam", "s3", "ssm"], version = "^5.0.27"}
+pipenv = "^2024.4.1"  # only used in tests
 pytest = "^8.3.4"
 pytest-cov = "^6.0.0"
 pytest-mock = "^3.14.0"
@@ -121,27 +120,6 @@ runway = "runway._cli.main:cli"
 
 [tool.poetry.urls]
 "Bug Tracker" = "https://github.com/rackspace/runway/issues"
-
-[tool.black]
-force-exclude = '''
-/(
-    \.eggs
-  | \.git
-  | \.demo
-  | \.hg
-  | \.mypy_cache
-  | \.runway
-  | \.tox
-  | \.venv
-  | _build
-  | build
-  | dist
-  | runway/aws_sso_botocore
-)/
-'''
-include = '\.pyi?$'
-line-length = 100
-target-version = ["py310", "py311", "py312", "py39"]
 
 [tool.coverage.report]
 exclude_lines = [
@@ -236,9 +214,12 @@ extend-exclude = [
   "typings",
 ]
 force-exclude = true
-line-length = 120
+line-length = 100
 show-fixes = true
 target-version = "py39"  # important to set before applying fixes
+
+[tool.ruff.format]  # https://docs.astral.sh/ruff/settings/#format
+docstring-code-format = true
 
 [tool.ruff.lint]  # https://docs.astral.sh/ruff/settings/#lint
 extend-safe-fixes = [
@@ -326,6 +307,9 @@ known-local-folder = [
 known-third-party = [
   "docker",  # NOTE (kyle): the `docker/` directory confuses isort
 ]
+
+[tool.ruff.lint.pycodestyle]  # https://docs.astral.sh/ruff/settings/#lint_pycodestyle_max-line-length
+max-line-length = 140
 
 [tool.ruff.lint.pydocstyle]  # https://docs.astral.sh/ruff/settings/#lintpydocstyle
 convention = "google"

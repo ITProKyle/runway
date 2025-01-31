@@ -36,6 +36,7 @@ if TYPE_CHECKING:
     from mypy_boto3_cloudformation.client import CloudFormationClient
     from mypy_boto3_cloudformation.type_defs import (
         ChangeTypeDef,
+        DeleteStackInputRequestTypeDef,
         DescribeChangeSetOutputTypeDef,
         ParameterTypeDef,
         StackEventTypeDef,
@@ -736,7 +737,7 @@ class Provider(BaseProvider):
     @staticmethod
     def _tail_print(event: StackEventTypeDef) -> None:
         print(  # noqa: T201
-            f'{event.get("ResourceStatus")} {event.get("ResourceType")} {event.get("EventId")}'
+            f"{event.get('ResourceStatus')} {event.get('ResourceType')} {event.get('EventId')}"
         )
 
     def get_delete_failed_status_reason(self, stack_name: str) -> str | None:
@@ -1184,7 +1185,9 @@ class Provider(BaseProvider):
             raise exceptions.CancelExecution
 
         try:
-            return self.noninteractive_destroy_stack(fqn, **kwargs)
+            return self.noninteractive_destroy_stack(
+                fqn, allow_disable_termination_protection=False, **kwargs
+            )
         except botocore.exceptions.ClientError as err:
             if "TerminationProtection" in err.response["Error"]["Message"]:
                 approval = ui.ask(
@@ -1272,19 +1275,36 @@ class Provider(BaseProvider):
 
         self.cloudformation.execute_change_set(ChangeSetName=change_set_id)
 
-    def noninteractive_destroy_stack(self, fqn: str, **_kwargs: Any) -> None:
+    def noninteractive_destroy_stack(
+        self, fqn: str, *, allow_disable_termination_protection: bool = True, **_kwargs: Any
+    ) -> None:
         """Delete a CloudFormation stack without interaction.
 
         Args:
             fqn: A fully qualified stack name.
+            allow_disable_termination_protection: Whether to disable termination protection
+                if deletion fails do to it being enable.
+                Termination protection will only be disable if the Stack's state
+                would typically allow for recreation.
 
         """
         LOGGER.debug("%s:destroying stack", fqn)
-        args = {"StackName": fqn}
+        args: DeleteStackInputRequestTypeDef = {"StackName": fqn}
         if self.service_role:
             args["RoleARN"] = self.service_role
 
-        self.cloudformation.delete_stack(**args)  # pyright: ignore[reportArgumentType]
+        try:
+            self.cloudformation.delete_stack(**args)
+        except botocore.exceptions.ClientError as exc:
+            if (
+                allow_disable_termination_protection
+                and "TerminationProtection" in exc.response["Error"]["Message"]
+                and self.is_stack_recreatable(self.get_stack(fqn))
+            ):
+                self.update_termination_protection(fqn, False)
+                self.cloudformation.delete_stack(**args)
+            else:
+                raise
 
     def noninteractive_changeset_update(
         self,
@@ -1553,9 +1573,9 @@ class Provider(BaseProvider):
             output_params,
         ) in stack.blueprint.output_definitions.items():
             if output_name not in self._outputs[stack.fqn]:
-                self._outputs[stack.fqn][
-                    output_name
-                ] = f"<inferred-change = {stack.fqn}.{output_name}={output_params['Value']}>"
+                self._outputs[stack.fqn][output_name] = (
+                    f"<inferred-change = {stack.fqn}.{output_name}={output_params['Value']}>"
+                )
 
         # when creating a changeset for a new stack, CFN creates a temporary
         # stack with a status of REVIEW_IN_PROGRESS. this is only removed if
@@ -1565,8 +1585,7 @@ class Provider(BaseProvider):
                 temp_stack = self.get_stack(stack.fqn)
                 if self.is_stack_in_review(temp_stack):
                     LOGGER.debug(
-                        "removing temporary stack that is created "
-                        'with a ChangeSet of type "CREATE"'
+                        'removing temporary stack that is created with a ChangeSet of type "CREATE"'
                     )
                     # this method is currently only used by one action so
                     # hardcoding should be fine for now.
