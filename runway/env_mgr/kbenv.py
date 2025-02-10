@@ -30,7 +30,7 @@ if TYPE_CHECKING:
 
 LOGGER = cast("RunwayLogger", logging.getLogger(__name__))
 KB_VERSION_FILENAME = ".kubectl-version"
-RELEASE_URI = "https://storage.googleapis.com/kubernetes-release/release"
+RELEASE_URI = "https://dl.k8s.io/release"
 
 
 def verify_kb_release(kb_url: str, download_dir: str, filename: str) -> None:
@@ -136,7 +136,8 @@ def download_kb_release(
     try:
         LOGGER.verbose("downloading kubectl from %s...", kb_url)
         urlretrieve(  # noqa: S310
-            kb_url + "/" + filename, os.path.join(download_dir, filename)  # noqa: PTH118
+            kb_url + "/" + filename,
+            os.path.join(download_dir, filename),  # noqa: PTH118
         )
     except URLError as exc:
         handle_bin_download_error(exc, "kubectl")
